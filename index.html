@@ -57,6 +57,75 @@
         </div>
 
     </div>
+    <script>
+        // Variabel untuk menyimpan pengaturan admin sementara
+        let savedEmail = '';
+        let savedPassword = '';
 
+        // Mengambil elemen formulir
+        const adminForm = document.getElementById('adminForm');
+        const emailForm = document.getElementById('emailForm');
+
+        // Logika saat Panel Admin disimpan
+        adminForm.addEventListener('submit', function(e) {
+            e.preventDefault(); // Mencegah halaman refresh
+            
+            // Menyimpan nilai dari input admin
+            savedEmail = adminForm.querySelector('input[type="email"]').value;
+            savedPassword = adminForm.querySelector('input[type="password"]').value;
+            
+            alert('Pengaturan Admin berhasil disimpan! Anda sekarang bisa mengirim pesan.');
+        });
+
+        // Logika saat Formulir Kirim Email ditekan
+        emailForm.addEventListener('submit', async function(e) {
+            e.preventDefault(); // Mencegah halaman refresh
+
+            // Pengecekan: Pastikan panel admin sudah diisi terlebih dahulu
+            if (!savedEmail || !savedPassword) {
+                alert('Tolong isi dan simpan pengaturan di Panel Admin terlebih dahulu!');
+                return;
+            }
+
+            // Mengambil nilai subjek dan pesan
+            const subject = emailForm.querySelector('input[type="text"]').value;
+            const message = emailForm.querySelector('textarea').value;
+            
+            // Memberikan efek visual bahwa pesan sedang dikirim
+            const submitBtn = emailForm.querySelector('button');
+            const originalText = submitBtn.innerText;
+            submitBtn.innerText = 'Mengirim...';
+            submitBtn.disabled = true;
+
+            try {
+                // Mengirim data ke server Node.js kita
+                const response = await fetch('http://localhost:3000/api/send-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        senderEmail: savedEmail,
+                        appPassword: savedPassword,
+                        subject: subject,
+                        message: message
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert(result.message);
+                    emailForm.reset(); // Mengosongkan formulir setelah berhasil
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch (error) {
+                alert('Tidak dapat terhubung ke server. Pastikan server Node.js sudah berjalan!');
+            } finally {
+                // Mengembalikan tombol seperti semula
+                submitBtn.innerText = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
 </body>
 </html>
