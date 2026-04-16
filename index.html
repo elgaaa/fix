@@ -2,425 +2,498 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Phone Processor Pro | Smart Number Tool</title>
-    <!-- Tailwind CSS + Font Awesome 6 (free) + Google Font Inter -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phone Number Processor</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: { 'sans': ['Inter', 'system-ui', 'sans-serif'] },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
                     animation: {
-                        'fade-in': 'fadeIn 0.3s ease-out',
-                        'pop': 'pop 0.2s ease-in-out',
-                        'pulse-ring': 'pulseRing 0.6s ease-out'
+                        'fade-in': 'fadeIn 0.5s ease-out',
+                        'slide-up': 'slideUp 0.4s ease-out',
+                        'bounce-short': 'bounceShort 0.5s ease-in-out',
                     },
                     keyframes: {
-                        fadeIn: { '0%': { opacity: '0', transform: 'translateY(6px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
-                        pop: { '0%': { transform: 'scale(0.9)', opacity: '0' }, '80%': { transform: 'scale(1.05)' }, '100%': { transform: 'scale(1)', opacity: '1' } },
-                        pulseRing: { '0%': { transform: 'scale(0.8)', opacity: '0.7' }, '100%': { transform: 'scale(1.4)', opacity: '0' } }
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                        bounceShort: {
+                            '0%, 100%': { transform: 'scale(1)' },
+                            '50%': { transform: 'scale(1.2)' },
+                        }
                     }
                 }
             }
         }
     </script>
     <style>
-        * { transition: all 0.2s ease; }
-        body { background: radial-gradient(circle at 10% 20%, #0f172a, #020617); }
-        .glass-card { background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(71, 85, 105, 0.5); }
-        .number-item { transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1); }
-        .number-item:hover { background: rgba(56, 189, 248, 0.1); transform: translateX(4px); border-left-color: #38bdf8; }
-        .copy-icon-btn { transition: all 0.15s; cursor: pointer; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 10px; }
-        .copy-icon-btn:hover { background: rgba(100, 116, 139, 0.5); transform: scale(1.05); }
-        .copy-icon-btn:active { transform: scale(0.92); }
-        .toast-notify { animation: slideInRight 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1) forwards; }
-        @keyframes slideInRight {
-            from { opacity: 0; transform: translateX(40px); }
-            to { opacity: 1; transform: translateX(0); }
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
         }
-        .scroll-style::-webkit-scrollbar { width: 5px; height: 5px; }
-        .scroll-style::-webkit-scrollbar-track { background: #1e293b; border-radius: 10px; }
-        .scroll-style::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
-        button:active { transform: scale(0.97); }
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(71, 85, 105, 0.8);
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(100, 116, 139, 1);
+        }
+        .copy-btn {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .copy-btn:active {
+            transform: scale(0.95);
+        }
+        .notification {
+            transform: translateX(100%);
+            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        .notification.show {
+            transform: translateX(0);
+        }
+        .number-item {
+            transition: all 0.3s ease;
+        }
+        .number-item:hover {
+            transform: translateX(4px);
+            background: rgba(51, 65, 85, 0.8);
+        }
     </style>
 </head>
-<body class="font-sans antialiased min-h-screen p-4 md:p-6">
+<body class="text-slate-200 p-4 md:p-8">
+
+    <!-- Notification Container -->
+    <div id="notificationContainer" class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
     <div class="max-w-6xl mx-auto">
         <!-- Header -->
-        <div class="text-center mb-8 animate-fade-in">
-            <div class="inline-flex items-center justify-center p-3 bg-gradient-to-br from-sky-500/20 to-indigo-500/20 rounded-2xl backdrop-blur mb-3">
-                <i class="fas fa-phone-alt text-3xl text-sky-400"></i>
+        <header class="text-center mb-8 animate-fade-in">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 mb-4 shadow-lg shadow-cyan-500/25">
+                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                </svg>
             </div>
-            <h1 class="text-3xl md:text-4xl font-bold bg-gradient-to-r from-white via-sky-200 to-indigo-300 bg-clip-text text-transparent">Phone Processor Pro</h1>
-            <p class="text-slate-400 mt-2 text-sm">Upload .txt atau input manual · Ubah 62xxx → 8xxx · Copy setiap nomor dengan mudah</p>
-        </div>
+            <h1 class="text-3xl md:text-4xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent mb-2">
+                Phone Number Processor
+            </h1>
+            <p class="text-slate-400">Proses daftar nomor telepon dengan format otomatis</p>
+        </header>
 
-        <!-- Main Card -->
-        <div class="glass-card rounded-2xl shadow-2xl overflow-hidden transition-all duration-300">
-            <!-- Toolbar area -->
-            <div class="p-5 md:p-6 space-y-6">
-                <!-- Dua Kolom: Upload & Statistik -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
-                    <!-- Upload file -->
-                    <div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700/60 hover:border-sky-500/40 transition">
-                        <label class="block text-sm font-semibold text-slate-200 mb-2 flex items-center gap-2"><i class="fas fa-cloud-upload-alt text-sky-400"></i> Upload File .txt</label>
-                        <div class="flex flex-col sm:flex-row gap-3">
-                            <label for="fileInput" class="cursor-pointer flex-1 bg-sky-600/20 hover:bg-sky-600/40 text-sky-200 border border-sky-500/50 rounded-xl py-2.5 px-4 text-center transition-all backdrop-blur-sm">
-                                <i class="fas fa-folder-open mr-2"></i> Pilih file .txt
-                                <input type="file" id="fileInput" accept=".txt, .text/plain" class="hidden">
-                            </label>
-                            <div class="text-xs text-slate-400 self-center"><i class="fas fa-info-circle"></i> 1 nomor per baris</div>
-                        </div>
-                        <div id="fileNameDisplay" class="text-xs text-slate-500 mt-2 truncate italic"></div>
-                    </div>
-                    <!-- Statistik card -->
-                    <div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700/60">
-                        <div class="flex justify-between flex-wrap gap-2">
-                            <span class="text-sm font-semibold text-slate-200 flex items-center gap-2"><i class="fas fa-chart-line text-sky-400"></i> Statistik</span>
-                            <div class="flex gap-5 text-sm">
-                                <div><span id="totalCount" class="text-sky-300 font-bold text-lg">0</span> <span class="text-slate-400">Total</span></div>
-                                <div><span id="changedCount" class="text-emerald-300 font-bold text-lg">0</span> <span class="text-slate-400">Diubah (62→8)</span></div>
+        <div class="grid lg:grid-cols-2 gap-6">
+            <!-- Input Section -->
+            <div class="glass-card rounded-2xl p-6 animate-slide-up" style="animation-delay: 0.1s">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-semibold text-white flex items-center gap-2">
+                        <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                        </svg>
+                        Input
+                    </h2>
+                    <span class="text-xs text-slate-500 bg-slate-800 px-2 py-1 rounded-full">Upload atau Paste</span>
+                </div>
+
+                <!-- File Upload -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-slate-400 mb-2">Upload File (.txt)</label>
+                    <div class="relative group">
+                        <input type="file" id="fileInput" accept=".txt" class="hidden">
+                        <label for="fileInput" 
+                            class="flex items-center justify-center w-full h-24 border-2 border-dashed border-slate-600 rounded-xl cursor-pointer hover:border-cyan-500 hover:bg-slate-800/50 transition-all duration-300 group-hover:shadow-lg group-hover:shadow-cyan-500/10">
+                            <div class="text-center">
+                                <svg class="mx-auto h-8 w-8 text-slate-400 group-hover:text-cyan-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                <span class="mt-2 text-sm text-slate-400 group-hover:text-slate-300">Klik untuk upload file .txt</span>
                             </div>
-                        </div>
-                        <div class="mt-3 h-1.5 w-full bg-slate-700 rounded-full overflow-hidden">
-                            <div id="statsBar" class="h-full w-0 bg-gradient-to-r from-sky-500 to-indigo-500 transition-all duration-500 rounded-full"></div>
-                        </div>
-                        <p class="text-[11px] text-slate-500 mt-2"><i class="fas fa-magic"></i> Aturan: 62xxxxxxxx → 8xxxxxxxx (hapus 62, ganti awalan 8)</p>
+                        </label>
                     </div>
                 </div>
 
-                <!-- Input Manual Textarea -->
-                <div class="space-y-2">
-                    <div class="flex justify-between items-center flex-wrap gap-2">
-                        <label class="text-sm font-semibold text-slate-200 flex items-center gap-2"><i class="fas fa-pen-alt"></i> Input Manual / Paste</label>
-                        <button id="clearManualBtn" class="text-xs text-slate-400 hover:text-red-400 transition px-3 py-1 rounded-lg bg-slate-800/50"><i class="fas fa-trash-alt"></i> Kosongkan</button>
+                <div class="relative mb-4">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-slate-700"></div>
                     </div>
-                    <textarea id="manualInput" rows="4" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500/70 resize-y font-mono text-sm" placeholder="Contoh:&#10;628123456789&#10;08123456789&#10;621234567890&#10;085212345678"></textarea>
+                    <div class="relative flex justify-center text-sm">
+                        <span class="px-2 bg-slate-800 text-slate-500 rounded">ATAU</span>
+                    </div>
                 </div>
 
-                <!-- Tombol Aksi Utama -->
-                <div class="flex flex-wrap gap-3 pt-2">
-                    <button id="processBtn" class="bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-medium px-6 py-2.5 rounded-xl shadow-lg shadow-sky-600/20 flex items-center gap-2 transition-all"><i class="fas fa-play"></i> Proses Data</button>
-                    <button id="resetBtn" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-5 py-2.5 rounded-xl border border-slate-600 flex items-center gap-2 transition"><i class="fas fa-undo-alt"></i> Reset</button>
-                    <button id="copyAllBtn" class="bg-slate-800 hover:bg-slate-700 text-sky-300 px-5 py-2.5 rounded-xl border border-slate-600 flex items-center gap-2 transition"><i class="fas fa-copy"></i> Copy All</button>
-                    <button id="downloadBtn" class="bg-emerald-700/80 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-xl flex items-center gap-2 transition ml-auto"><i class="fas fa-download"></i> Download .txt</button>
+                <!-- Text Input -->
+                <div>
+                    <label class="block text-sm font-medium text-slate-400 mb-2">Paste Nomor (1 per baris)</label>
+                    <textarea id="manualInput" 
+                        class="w-full h-40 bg-slate-900/80 border border-slate-700 rounded-xl p-4 text-slate-300 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-all resize-none custom-scrollbar"
+                        placeholder="Contoh:&#10;081234567890&#10;082345678901&#10;..."></textarea>
                 </div>
 
-                <!-- OUTPUT AREA: Dua Bentuk (Textarea + List interaktif) -->
-                <div class="space-y-4">
-                    <div class="flex items-center gap-2 border-b border-slate-700 pb-2">
-                        <i class="fas fa-list-ul text-sky-400"></i>
-                        <span class="text-sm font-semibold text-slate-200">Hasil Pemrosesan</span>
-                        <span id="resultBadge" class="text-xs bg-slate-800 px-2 py-0.5 rounded-full text-slate-300 ml-2 hidden"></span>
+                <button onclick="processInput()" 
+                    class="mt-4 w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-medium py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg hover:shadow-cyan-500/25 flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Proses Nomor
+                </button>
+            </div>
+
+            <!-- Output Section -->
+            <div class="glass-card rounded-2xl p-6 animate-slide-up" style="animation-delay: 0.2s">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-semibold text-white flex items-center gap-2">
+                        <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                        </svg>
+                        Hasil
+                    </h2>
+                    
+                    <!-- Stats -->
+                    <div id="statsContainer" class="hidden">
+                        <span class="text-xs text-slate-400 bg-slate-800 px-3 py-1 rounded-full border border-slate-700">
+                            Total: <span id="totalCount" class="text-emerald-400 font-bold">0</span> nomor
+                        </span>
                     </div>
+                </div>
 
-                    <!-- Textarea (copy semua) -->
-                    <textarea id="outputTextarea" rows="4" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-slate-200 font-mono text-sm resize-y focus:ring-1 focus:ring-sky-500" readonly placeholder="Hasil akan tampil disini (bisa di-copy semua)..."></textarea>
+                <!-- Bulk Output Textarea -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-slate-400 mb-2">Semua Nomor (Copy)</label>
+                    <div class="relative">
+                        <textarea id="bulkOutput" readonly
+                            class="w-full h-32 bg-slate-900/80 border border-slate-700 rounded-xl p-4 text-slate-300 custom-scrollbar font-mono text-sm"></textarea>
+                        <button onclick="copyAll()" 
+                            class="absolute top-2 right-2 p-2 bg-slate-700 hover:bg-cyan-600 rounded-lg transition-all duration-200 group"
+                            title="Copy All">
+                            <svg class="w-4 h-4 text-slate-300 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
 
-                    <!-- List interaktif per nomor dengan tombol copy -->
-                    <div class="bg-slate-900/40 rounded-xl border border-slate-700/60 overflow-hidden">
-                        <div class="bg-slate-800/60 px-4 py-2 text-xs font-medium text-slate-300 flex justify-between items-center">
-                            <span><i class="fas fa-hashtag mr-1"></i> Daftar Nomor (klik icon copy tiap nomor)</span>
-                            <span class="text-slate-400 text-[11px]"><i class="far fa-copy"></i> Klik ikon untuk menyalin</span>
+                <!-- Individual List -->
+                <div class="flex-1">
+                    <label class="block text-sm font-medium text-slate-400 mb-2">List Nomor (Individual Copy)</label>
+                    <div id="numberList" class="h-64 overflow-y-auto custom-scrollbar space-y-2 pr-2">
+                        <div class="text-center text-slate-600 py-12">
+                            <svg class="mx-auto h-12 w-12 mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                            </svg>
+                            <p class="text-sm">Belum ada nomor yang diproses</p>
                         </div>
-                        <div id="numberListContainer" class="max-h-72 overflow-y-auto scroll-style p-2 space-y-1">
-                            <div class="text-center text-slate-500 py-6 text-sm"><i class="fas fa-info-circle"></i> Belum ada data, klik "Proses Data"</div>
-                        </div>
                     </div>
                 </div>
-                <div class="text-center text-[11px] text-slate-500 border-t border-slate-700 pt-4 flex justify-between">
-                    <span><i class="fas fa-check-circle text-emerald-500"></i> Hanya baris angka, kosong otomatis diabaikan</span>
-                    <span><i class="fas fa-sync-alt"></i> 62xxxx → 8xxxx</span>
+
+                <!-- Action Buttons -->
+                <div class="grid grid-cols-3 gap-3 mt-4">
+                    <button onclick="copyAll()" 
+                        class="flex items-center justify-center gap-2 bg-slate-700 hover:bg-cyan-600 text-white py-2 px-4 rounded-lg transition-all duration-200 text-sm font-medium">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
+                        </svg>
+                        Copy All
+                    </button>
+                    <button onclick="downloadTxt()" 
+                        class="flex items-center justify-center gap-2 bg-slate-700 hover:bg-emerald-600 text-white py-2 px-4 rounded-lg transition-all duration-200 text-sm font-medium">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                        </svg>
+                        Download
+                    </button>
+                    <button onclick="resetAll()" 
+                        class="flex items-center justify-center gap-2 bg-slate-700 hover:bg-red-600 text-white py-2 px-4 rounded-lg transition-all duration-200 text-sm font-medium">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                        Reset
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Toast notification -->
-    <div id="toastRoot" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2"></div>
-
     <script>
-        // DOM elements
-        const fileInput = document.getElementById('fileInput');
-        const fileNameDisplay = document.getElementById('fileNameDisplay');
-        const manualTextarea = document.getElementById('manualInput');
-        const processBtn = document.getElementById('processBtn');
-        const resetBtn = document.getElementById('resetBtn');
-        const copyAllBtn = document.getElementById('copyAllBtn');
-        const downloadBtn = document.getElementById('downloadBtn');
-        const outputTextarea = document.getElementById('outputTextarea');
-        const numberListContainer = document.getElementById('numberListContainer');
-        const totalCountSpan = document.getElementById('totalCount');
-        const changedCountSpan = document.getElementById('changedCount');
-        const statsBar = document.getElementById('statsBar');
-        const clearManualBtn = document.getElementById('clearManualBtn');
-        const resultBadge = document.getElementById('resultBadge');
+        let processedNumbers = [];
 
-        // Data state
-        let currentNumbers = [];       // array of { original, processed, changed }
-        let currentProcessedPlain = []; // array string processed
+        // File Upload Handler
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
 
-        // Helper Toast
-        function showToast(message, type = 'success') {
-            const toastRoot = document.getElementById('toastRoot');
-            const toast = document.createElement('div');
-            const bg = type === 'success' ? 'bg-emerald-600' : (type === 'error' ? 'bg-red-600' : 'bg-sky-600');
-            const icon = type === 'success' ? 'fa-circle-check' : (type === 'error' ? 'fa-circle-exclamation' : 'fa-info-circle');
-            toast.className = `${bg} text-white px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-3 backdrop-blur-md text-sm font-medium toast-notify`;
-            toast.innerHTML = `<i class="fas ${icon} text-base"></i><span>${message}</span>`;
-            toastRoot.appendChild(toast);
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateX(30px)';
-                setTimeout(() => { if (toast.parentNode) toast.remove(); }, 300);
-            }, 2500);
-        }
-
-        // Fungsi utama: memproses array baris mentah -> array processed, statistik
-        function processPhoneNumbers(linesArray) {
-            const validResults = []; // { raw, processed, changed }
-            let changedTotal = 0;
-            for (let rawLine of linesArray) {
-                let trimmed = rawLine.trim();
-                if (trimmed === "") continue;
-                // hanya baris yang berisi digit (angka)
-                if (!/^\d+$/.test(trimmed)) continue;
-                
-                let processed = trimmed;
-                let changed = false;
-                // Aturan baru: Jika diawali "62" → hapus "62" dan ubah menjadi diawali "8"
-                if (trimmed.startsWith("62")) {
-                    let without62 = trimmed.substring(2); // hapus 62
-                    if (without62.length > 0) {
-                        processed = "8" + without62;
-                        changed = true;
-                        changedTotal++;
-                    } else {
-                        // jika setelah hapus kosong, skip (invalid)
-                        continue;
-                    }
-                } else {
-                    processed = trimmed;
-                }
-                // Pastikan processed tidak kosong
-                if (processed.length === 0) continue;
-                validResults.push({ original: trimmed, processed: processed, changed: changed });
-            }
-            return {
-                items: validResults,
-                changedCount: changedTotal,
-                totalValid: validResults.length,
-                processedStrings: validResults.map(item => item.processed)
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const content = e.target.result;
+                document.getElementById('manualInput').value = content;
+                showNotification('File berhasil diproses!', 'success');
+                processInput();
             };
-        }
+            reader.onerror = function() {
+                showNotification('Gagal membaca file!', 'error');
+            };
+            reader.readAsText(file);
+        });
 
-        // Render list interaktif dengan tombol copy per nomor
-        function renderNumberList(numbersArray) {
-            if (!numbersArray.length) {
-                numberListContainer.innerHTML = `<div class="text-center text-slate-500 py-6 text-sm"><i class="fas fa-database"></i> Tidak ada nomor valid</div>`;
+        // Process Input Function
+        function processInput() {
+            const input = document.getElementById('manualInput').value;
+            
+            if (!input.trim()) {
+                showNotification('Masukkan nomor terlebih dahulu!', 'warning');
                 return;
             }
-            numberListContainer.innerHTML = '';
-            numbersArray.forEach((item, idx) => {
-                const div = document.createElement('div');
-                div.className = 'number-item flex justify-between items-center bg-slate-800/30 border-l-4 border-transparent rounded-lg px-3 py-2.5 transition-all';
-                const numberSpan = document.createElement('span');
-                numberSpan.className = 'text-slate-200 font-mono text-sm break-all';
-                numberSpan.innerText = item.processed;
-                // badge perubahan
-                if (item.changed) {
-                    const badge = document.createElement('span');
-                    badge.className = 'ml-2 text-[10px] bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded-full';
-                    badge.innerText = 'diubah';
-                    numberSpan.appendChild(badge);
+
+            // Split by lines and process
+            const lines = input.split('\n');
+            processedNumbers = [];
+
+            lines.forEach(line => {
+                const trimmed = line.trim();
+                // Check if line contains any digit
+                if (trimmed && /\d/.test(trimmed)) {
+                    // Add + prefix if not exists
+                    const formatted = trimmed.startsWith('+') ? trimmed : '+' + trimmed;
+                    processedNumbers.push(formatted);
                 }
-                const copyBtn = document.createElement('button');
-                copyBtn.className = 'copy-icon-btn text-slate-400 hover:text-sky-300';
-                copyBtn.setAttribute('data-number', item.processed);
-                copyBtn.setAttribute('data-idx', idx);
-                copyBtn.innerHTML = `<i class="far fa-copy text-base"></i>`;
+            });
+
+            if (processedNumbers.length === 0) {
+                showNotification('Tidak ada nomor valid yang ditemukan!', 'warning');
+                return;
+            }
+
+            updateUI();
+            showNotification(`Berhasil memproses ${processedNumbers.length} nomor!`, 'success');
+        }
+
+        // Update UI
+        function updateUI() {
+            // Update stats
+            document.getElementById('totalCount').textContent = processedNumbers.length;
+            document.getElementById('statsContainer').classList.remove('hidden');
+
+            // Update bulk output
+            document.getElementById('bulkOutput').value = processedNumbers.join('\n');
+
+            // Update list
+            const listContainer = document.getElementById('numberList');
+            listContainer.innerHTML = '';
+
+            processedNumbers.forEach((number, index) => {
+                const item = document.createElement('div');
+                item.className = 'number-item flex items-center justify-between bg-slate-800/50 border border-slate-700 rounded-lg p-3 group';
+                item.style.animationDelay = `${index * 0.05}s`;
                 
-                // Event copy individual dengan animasi ubah icon
-                copyBtn.addEventListener('click', async (e) => {
-                    e.stopPropagation();
-                    const phoneNumber = copyBtn.getAttribute('data-number');
-                    try {
-                        await navigator.clipboard.writeText(phoneNumber);
-                        // Ubah icon menjadi centang
-                        copyBtn.innerHTML = `<i class="fas fa-check text-emerald-400 text-base"></i>`;
-                        showToast(`✅ "${phoneNumber}" disalin`, 'success');
-                        setTimeout(() => {
-                            if (copyBtn) copyBtn.innerHTML = `<i class="far fa-copy text-base"></i>`;
-                        }, 1800);
-                    } catch (err) {
-                        showToast(`Gagal menyalin`, 'error');
-                        copyBtn.innerHTML = `<i class="fas fa-exclamation-triangle text-red-400"></i>`;
-                        setTimeout(() => { if(copyBtn) copyBtn.innerHTML = `<i class="far fa-copy text-base"></i>`; }, 1500);
-                    }
-                });
+                item.innerHTML = `
+                    <span class="font-mono text-slate-300 text-sm md:text-base truncate mr-4">${number}</span>
+                    <button onclick="copySingle('${number}', this)" 
+                        class="copy-btn flex-shrink-0 p-2 rounded-lg bg-slate-700 hover:bg-cyan-600 text-slate-400 hover:text-white transition-all duration-200"
+                        title="Copy nomor">
+                        <svg class="copy-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                        </svg>
+                        <svg class="check-icon w-4 h-4 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </button>
+                `;
                 
-                div.appendChild(numberSpan);
-                div.appendChild(copyBtn);
-                numberListContainer.appendChild(div);
+                listContainer.appendChild(item);
             });
         }
 
-        // Update semua UI: textarea, list, statistik
-        function updateFullUI(processResult) {
-            const { items, changedCount, totalValid, processedStrings } = processResult;
-            currentNumbers = items;
-            currentProcessedPlain = processedStrings;
-            
-            // Update textarea output
-            if (processedStrings.length === 0) {
-                outputTextarea.value = '';
-                totalCountSpan.innerText = '0';
-                changedCountSpan.innerText = '0';
-                statsBar.style.width = '0%';
-                renderNumberList([]);
-                resultBadge.classList.add('hidden');
-                showToast("Tidak ada data valid untuk diproses", "error");
-                return;
-            }
-            
-            outputTextarea.value = processedStrings.join('\n');
-            totalCountSpan.innerText = totalValid;
-            changedCountSpan.innerText = changedCount;
-            const percent = totalValid > 0 ? (changedCount / totalValid) * 100 : 0;
-            statsBar.style.width = `${percent}%`;
-            
-            // Render list dinamis
-            renderNumberList(items);
-            resultBadge.innerText = `✓ ${totalValid} nomor`;
-            resultBadge.classList.remove('hidden');
-            setTimeout(() => resultBadge.classList.add('hidden'), 3000);
-            
-            if (changedCount > 0) {
-                showToast(`✅ ${changedCount} nomor diubah (62 → 8)`, 'success');
-            } else if (totalValid > 0) {
-                showToast(`📋 ${totalValid} nomor valid, tidak ada perubahan`, 'success');
-            }
-        }
-        
-        // Proses dari sumber manual textarea
-        function processFromManual() {
-            const rawText = manualTextarea.value;
-            if (!rawText.trim()) {
-                showToast("Tidak ada input di area manual", "error");
-                // reset tampilan jika kosong
-                updateFullUI({ items: [], changedCount: 0, totalValid: 0, processedStrings: [] });
-                return;
-            }
-            const lines = rawText.split(/\r?\n/);
-            const result = processPhoneNumbers(lines);
-            updateFullUI(result);
-        }
-        
-        // Proses dari file upload
-        function processFromFile(file) {
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const content = e.target.result;
-                const lines = content.split(/\r?\n/);
-                const result = processPhoneNumbers(lines);
-                updateFullUI(result);
-                fileNameDisplay.innerText = `📁 ${file.name} (${result.totalValid} nomor valid)`;
-                showToast(`File "${file.name}" berhasil diproses`, 'success');
-                // optional: tidak mengisi manual biar independen, tapi user bisa lihat hasil
-            };
-            reader.onerror = () => showToast("Gagal membaca file", "error");
-            reader.readAsText(file, "UTF-8");
-        }
-        
-        // Reset semua data (clear manual, output, list, stat, file input)
-        function fullReset() {
-            manualTextarea.value = "";
-            outputTextarea.value = "";
-            numberListContainer.innerHTML = `<div class="text-center text-slate-500 py-6 text-sm"><i class="fas fa-info-circle"></i> Belum ada data, klik "Proses Data"</div>`;
-            totalCountSpan.innerText = "0";
-            changedCountSpan.innerText = "0";
-            statsBar.style.width = "0%";
-            currentNumbers = [];
-            currentProcessedPlain = [];
-            fileInput.value = "";
-            fileNameDisplay.innerText = "";
-            showToast("Semua data direset", "success");
-            resultBadge.classList.add('hidden');
-        }
-        
-        // Copy All (dari textarea)
-        async function copyAllNumbers() {
-            const textToCopy = outputTextarea.value;
-            if (!textToCopy.trim()) {
-                showToast("Tidak ada nomor untuk disalin", "error");
-                return;
-            }
+        // Copy Single Number
+        async function copySingle(number, btn) {
             try {
-                await navigator.clipboard.writeText(textToCopy);
-                showToast(`📋 ${currentProcessedPlain.length} nomor berhasil disalin semua`, "success");
-                // animasi kecil pada tombol copy all
-                const copyBtnElem = copyAllBtn;
-                copyBtnElem.innerHTML = `<i class="fas fa-check"></i> Tersalin!`;
-                setTimeout(() => { copyBtnElem.innerHTML = `<i class="fas fa-copy"></i> Copy All`; }, 1500);
+                await navigator.clipboard.writeText(number);
+                
+                // Visual feedback
+                const copyIcon = btn.querySelector('.copy-icon');
+                const checkIcon = btn.querySelector('.check-icon');
+                
+                copyIcon.classList.add('hidden');
+                checkIcon.classList.remove('hidden');
+                btn.classList.add('bg-emerald-600', 'text-white');
+                btn.classList.remove('bg-slate-700', 'text-slate-400');
+                
+                showNotification('Berhasil disalin!', 'success');
+                
+                // Reset after 2 seconds
+                setTimeout(() => {
+                    copyIcon.classList.remove('hidden');
+                    checkIcon.classList.add('hidden');
+                    btn.classList.remove('bg-emerald-600', 'text-white');
+                    btn.classList.add('bg-slate-700', 'text-slate-400');
+                }, 2000);
+                
             } catch (err) {
-                showToast("Gagal menyalin, coba manual", "error");
+                showNotification('Gagal menyalin!', 'error');
             }
         }
-        
-        // Download .txt
-        function downloadResult() {
-            const content = outputTextarea.value;
-            if (!content.trim()) {
-                showToast("Tidak ada data untuk diunduh", "error");
+
+        // Copy All
+        async function copyAll() {
+            if (processedNumbers.length === 0) {
+                showNotification('Tidak ada data untuk disalin!', 'warning');
                 return;
             }
-            const blob = new Blob([content], { type: "text/plain" });
+
+            const text = document.getElementById('bulkOutput').value;
+            try {
+                await navigator.clipboard.writeText(text);
+                showNotification('Semua nomor berhasil disalin!', 'success');
+            } catch (err) {
+                showNotification('Gagal menyalin!', 'error');
+            }
+        }
+
+        // Download TXT
+        function downloadTxt() {
+            if (processedNumbers.length === 0) {
+                showNotification('Tidak ada data untuk didownload!', 'warning');
+                return;
+            }
+
+            const text = processedNumbers.join('\n');
+            const blob = new Blob([text], { type: 'text/plain' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            const timestamp = new Date().toISOString().slice(0,19).replace(/:/g, '-');
-            a.download = `processed_numbers_${timestamp}.txt`;
+            a.download = `phone_numbers_${new Date().getTime()}.txt`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-            showToast("File hasil berhasil diunduh", "success");
+            
+            showNotification('File berhasil didownload!', 'success');
         }
+
+        // Reset All
+        function resetAll() {
+            processedNumbers = [];
+            document.getElementById('manualInput').value = '';
+            document.getElementById('fileInput').value = '';
+            document.getElementById('bulkOutput').value = '';
+            document.getElementById('statsContainer').classList.add('hidden');
+            
+            const listContainer = document.getElementById('numberList');
+            listContainer.innerHTML = `
+                <div class="text-center text-slate-600 py-12">
+                    <svg class="mx-auto h-12 w-12 mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    <p class="text-sm">Belum ada nomor yang diproses</p>
+                </div>
+            `;
+            
+            showNotification('Semua data telah direset!', 'info');
+        }
+
+        // Notification System
+        function showNotification(message, type = 'info') {
+            const container = document.getElementById('notificationContainer');
+            const notification = document.createElement('div');
+            
+            const colors = {
+                success: 'bg-emerald-500/90 border-emerald-400',
+                error: 'bg-red-500/90 border-red-400',
+                warning: 'bg-amber-500/90 border-amber-400',
+                info: 'bg-blue-500/90 border-blue-400'
+            };
+
+            const icons = {
+                success: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>',
+                error: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>',
+                warning: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>',
+                info: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>'
+            };
+            
+            notification.className = `notification pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-xl border backdrop-blur-md shadow-lg text-white ${colors[type]}`;
+            notification.innerHTML = `
+                ${icons[type]}
+                <span class="font-medium text-sm">${message}</span>
+            `;
+            
+            container.appendChild(notification);
+            
+            // Trigger animation
+            requestAnimationFrame(() => {
+                notification.classList.add('show');
+            });
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    container.removeChild(notification);
+                }, 400);
+            }, 3000);
+        }
+
+        // Drag and drop support
+        const dropZone = document.querySelector('label[for="fileInput"]');
         
-        // Event listeners
-        processBtn.addEventListener('click', processFromManual);
-        resetBtn.addEventListener('click', fullReset);
-        copyAllBtn.addEventListener('click', copyAllNumbers);
-        downloadBtn.addEventListener('click', downloadResult);
-        clearManualBtn.addEventListener('click', () => {
-            manualTextarea.value = "";
-            showToast("Input manual dikosongkan", "success");
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
         });
-        fileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                if (!file.name.endsWith('.txt') && file.type !== 'text/plain') {
-                    showToast("Harap pilih file .txt", "error");
-                    return;
-                }
-                processFromFile(file);
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight(e) {
+            dropZone.classList.add('border-cyan-500', 'bg-slate-800');
+        }
+
+        function unhighlight(e) {
+            dropZone.classList.remove('border-cyan-500', 'bg-slate-800');
+        }
+
+        dropZone.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            
+            if (files.length > 0 && files[0].name.endsWith('.txt')) {
+                document.getElementById('fileInput').files = files;
+                const event = new Event('change');
+                document.getElementById('fileInput').dispatchEvent(event);
+            } else {
+                showNotification('Hanya file .txt yang diizinkan!', 'warning');
             }
-        });
-        
-        // Preload contoh agar user tidak bingung (contoh data)
-        manualTextarea.value = "628123456789\n08123456789\n621234567890\n085212345678\n628512345678";
-        // Optional: tidak otomatis proses, tapi lebih baik tidak auto proses agar user belajar klik proses.
-        // Tapi user bisa langsung klik proses. 
-        // Sediakan info tooltip di statistik.
-        
-        // inisiasi state awal bersih
-        fullReset();
+        }
     </script>
 </body>
 </html>
