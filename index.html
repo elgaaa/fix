@@ -2,130 +2,565 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Pengirim Email</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Phone Processor | Clean & Modern Tool</title>
+    <!-- Tailwind CSS v3 + Font Awesome Icons + Google Fonts (Inter) -->
     <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100 min-h-screen p-6 flex items-center justify-center">
-
-    <div class="max-w-4xl w-full grid grid-cols-1 md:grid-cols-2 gap-6">
-        
-        <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-blue-500">
-            <h2 class="text-xl font-bold mb-4 border-b pb-2 text-gray-800">Panel Admin: Atur Pengirim</h2>
-            
-            <form id="adminForm" class="space-y-5">
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">Email Pengirim</label>
-                    <input type="email" class="w-full border border-gray-300 rounded-md p-2.5 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="contoh@gmail.com" required>
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">Sandi Aplikasi (App Password)</label>
-                    <input type="password" class="w-full border border-gray-300 rounded-md p-2.5 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="xxxx xxxx xxxx xxxx" required>
-                    <p class="text-xs text-gray-500 mt-1">Gunakan sandi aplikasi dari pengaturan keamanan email Anda, bukan sandi utama.</p>
-                </div>
-                
-                <button type="submit" class="w-full bg-blue-600 text-white font-bold p-2.5 rounded-md hover:bg-blue-700 transition duration-300">
-                    Simpan Pengaturan
-                </button>
-            </form>
-        </div>
-
-        <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-green-500">
-            <h2 class="text-xl font-bold mb-4 border-b pb-2 text-gray-800">Kirim Email ke Support</h2>
-            
-            <form id="emailForm" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">Tujuan</label>
-                    <input type="email" class="w-full border border-gray-300 rounded-md p-2.5 bg-gray-100 cursor-not-allowed text-gray-600 font-medium" value="support@support.whatsapp.com" readonly>
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">Subjek Pesan</label>
-                    <input type="text" class="w-full border border-gray-300 rounded-md p-2.5 focus:ring-2 focus:ring-green-500 outline-none" placeholder="Masukkan subjek keluhan/bantuan..." required>
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">Isi Pesan</label>
-                    <textarea class="w-full border border-gray-300 rounded-md p-2.5 focus:ring-2 focus:ring-green-500 outline-none h-32 resize-none" placeholder="Tuliskan detail pesan Anda di sini..." required></textarea>
-                </div>
-                
-                <button type="submit" class="w-full bg-green-600 text-white font-bold p-2.5 rounded-md hover:bg-green-700 transition duration-300">
-                    Kirim Pesan Sekarang
-                </button>
-            </form>
-        </div>
-
-    </div>
+    <!-- Custom konfigurasi Tailwind + dark mode override -->
     <script>
-        // Variabel untuk menyimpan pengaturan admin sementara
-        let savedEmail = '';
-        let savedPassword = '';
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.3s ease-out',
+                        'pulse-slow': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(4px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Custom scrollbar untuk textarea modern */
+        textarea::-webkit-scrollbar {
+            width: 6px;
+        }
+        textarea::-webkit-scrollbar-track {
+            background: #1e293b;
+            border-radius: 10px;
+        }
+        textarea::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 10px;
+        }
+        textarea::-webkit-scrollbar-thumb:hover {
+            background: #5b6e8c;
+        }
+        body {
+            transition: background 0.2s ease;
+        }
+        .card-hover {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -12px rgba(0, 0, 0, 0.4);
+        }
+        button:active {
+            transform: scale(0.97);
+        }
+        .btn-transition {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .notification {
+            animation: slideDown 0.25s ease forwards;
+        }
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-gray-900 font-sans antialiased min-h-screen">
 
-        // Mengambil elemen formulir
-        const adminForm = document.getElementById('adminForm');
-        const emailForm = document.getElementById('emailForm');
+    <div class="container max-w-5xl mx-auto px-4 py-8 md:py-12">
+        <!-- Header Section -->
+        <div class="text-center mb-10 animate-fade-in">
+            <div class="inline-flex items-center justify-center p-2 bg-indigo-500/20 rounded-2xl backdrop-blur-sm mb-3">
+                <i class="fas fa-phone-alt text-indigo-400 text-2xl md:text-3xl"></i>
+            </div>
+            <h1 class="text-3xl md:text-4xl font-bold bg-gradient-to-r from-white to-indigo-300 bg-clip-text text-transparent">Phone Number Processor</h1>
+            <p class="text-slate-400 mt-2 text-sm md:text-base">Upload .txt atau input manual · Hapus awalan "62" otomatis</p>
+        </div>
 
-        // Logika saat Panel Admin disimpan
-        adminForm.addEventListener('submit', function(e) {
-            e.preventDefault(); // Mencegah halaman refresh
+        <!-- Main Card (Glassmorphism + dark mode) -->
+        <div class="bg-slate-800/70 backdrop-blur-sm rounded-2xl shadow-2xl border border-slate-700/70 overflow-hidden card-hover transition-all duration-300">
             
-            // Menyimpan nilai dari input admin
-            savedEmail = adminForm.querySelector('input[type="email"]').value;
-            savedPassword = adminForm.querySelector('input[type="password"]').value;
+            <!-- Tab/Header Pilihan Input -->
+            <div class="flex flex-wrap border-b border-slate-700 bg-slate-900/40 px-5 pt-3 gap-1">
+                <div class="flex space-x-2">
+                    <span class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-indigo-300 border-b-2 border-indigo-500 transition">
+                        <i class="fas fa-microchip"></i> Proses Cerdas
+                    </span>
+                </div>
+                <div class="ml-auto text-xs text-slate-500 flex items-center gap-1">
+                    <i class="fas fa-shield-alt"></i> <span>Client-side · Privasi aman</span>
+                </div>
+            </div>
+
+            <div class="p-5 md:p-7 space-y-6">
+                <!-- Area Upload File + Manual Input (grid responsive) -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Kiri: Upload File -->
+                    <div class="bg-slate-900/40 rounded-xl p-4 border border-slate-700/50 transition-all hover:border-indigo-500/30">
+                        <label class="block text-sm font-semibold text-slate-300 mb-2 flex items-center gap-2">
+                            <i class="fas fa-upload text-indigo-400"></i> Upload File .txt
+                        </label>
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <label for="fileInput" class="cursor-pointer flex-1 bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-200 border border-indigo-500/40 rounded-lg py-2.5 px-4 text-center transition-all duration-200 backdrop-blur-sm">
+                                <i class="fas fa-folder-open mr-2"></i> Pilih File
+                                <input type="file" id="fileInput" accept=".txt, .text/plain" class="hidden">
+                            </label>
+                            <div class="text-xs text-slate-400 self-center flex items-center gap-1">
+                                <i class="fas fa-info-circle"></i> .txt, satu nomor per baris
+                            </div>
+                        </div>
+                        <div id="fileNameDisplay" class="text-xs text-slate-500 mt-2 truncate italic"></div>
+                    </div>
+
+                    <!-- Kanan: Statistik & Preview Jumlah -->
+                    <div class="bg-slate-900/40 rounded-xl p-4 border border-slate-700/50">
+                        <div class="flex justify-between items-center flex-wrap gap-2">
+                            <span class="text-sm font-semibold text-slate-300 flex items-center gap-2"><i class="fas fa-chart-simple text-indigo-400"></i> Statistik Data</span>
+                            <div class="flex gap-4 text-xs">
+                                <div><span class="text-indigo-300 font-bold" id="totalCount">0</span> <span class="text-slate-400">Total nomor</span></div>
+                                <div><span class="text-emerald-300 font-bold" id="changedCount">0</span> <span class="text-slate-400">Diubah (62→hapus)</span></div>
+                            </div>
+                        </div>
+                        <div class="mt-2 h-1 w-full bg-slate-700 rounded-full overflow-hidden">
+                            <div id="statsBar" class="h-full w-0 bg-indigo-500 transition-all duration-500 rounded-full"></div>
+                        </div>
+                        <p class="text-[11px] text-slate-500 mt-2"><i class="fas fa-arrow-right"></i> Nomor diawali "62" otomatis dihapus prefix-nya</p>
+                    </div>
+                </div>
+
+                <!-- Input Manual (Textarea) -->
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center">
+                        <label class="text-sm font-semibold text-slate-300 flex items-center gap-2"><i class="fas fa-keyboard"></i> Input Manual / Tempel</label>
+                        <button id="clearManualBtn" class="text-xs text-slate-400 hover:text-red-400 transition px-2 py-1 rounded-md hover:bg-slate-800"><i class="fas fa-eraser"></i> Kosongkan</button>
+                    </div>
+                    <textarea id="manualInput" rows="4" class="w-full bg-slate-900 border border-slate-600 rounded-xl p-3 text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 focus:border-transparent transition resize-y font-mono text-sm" placeholder="Contoh:&#10;628123456789&#10;08123456789&#10;621234567890&#10;&#10;Atau paste daftar nomor (satu per baris)"></textarea>
+                </div>
+
+                <!-- Action Buttons: Proses, Reset, Copy All, Download -->
+                <div class="flex flex-wrap gap-3 pt-2">
+                    <button id="processBtn" class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-6 py-2.5 rounded-xl shadow-lg shadow-indigo-600/20 flex items-center gap-2 transition-all btn-transition">
+                        <i class="fas fa-play-circle"></i> Proses Data
+                    </button>
+                    <button id="resetBtn" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-6 py-2.5 rounded-xl border border-slate-500 flex items-center gap-2 transition-all btn-transition">
+                        <i class="fas fa-undo-alt"></i> Reset Semua
+                    </button>
+                    <button id="copyAllBtn" class="bg-slate-800 hover:bg-slate-700 text-indigo-300 px-5 py-2.5 rounded-xl border border-slate-600 flex items-center gap-2 transition-all btn-transition">
+                        <i class="fas fa-copy"></i> Copy All
+                    </button>
+                    <button id="downloadBtn" class="bg-emerald-700/70 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-xl flex items-center gap-2 transition-all btn-transition ml-auto">
+                        <i class="fas fa-download"></i> Download .txt
+                    </button>
+                </div>
+
+                <!-- Output / Hasil Proses -->
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center">
+                        <label class="text-sm font-semibold text-slate-300 flex items-center gap-2"><i class="fas fa-list-check"></i> Hasil Pemrosesan</label>
+                        <span id="notificationBadge" class="text-xs px-2 py-0.5 rounded-full bg-slate-700 text-slate-300 hidden"></span>
+                    </div>
+                    <textarea id="outputArea" rows="8" class="w-full bg-slate-900 border border-slate-600 rounded-xl p-3 text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono text-sm resize-y" readonly placeholder="Hasil nomor yang telah diproses akan muncul di sini..."></textarea>
+                </div>
+
+                <!-- Catatan kecil footer -->
+                <div class="text-center text-xs text-slate-500 border-t border-slate-700 pt-4 mt-2 flex flex-wrap justify-between">
+                    <span><i class="fas fa-check-circle text-emerald-500"></i> Validasi: hanya baris berisi angka, abaikan kosong</span>
+                    <span><i class="fas fa-lightbulb"></i> Aturan: 62xxxxxxxx → xxxxxxxx (hapus 62 di awal)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Notifikasi (custom toast) -->
+    <div id="toastMessage" class="fixed bottom-5 right-5 z-50 transition-all duration-300 transform translate-y-20 opacity-0"></div>
+
+    <script>
+        // ---------- DOM Elements ----------
+        const fileInput = document.getElementById('fileInput');
+        const fileNameDisplay = document.getElementById('fileNameDisplay');
+        const manualTextarea = document.getElementById('manualInput');
+        const processBtn = document.getElementById('processBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const copyAllBtn = document.getElementById('copyAllBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const outputArea = document.getElementById('outputArea');
+        const totalCountSpan = document.getElementById('totalCount');
+        const changedCountSpan = document.getElementById('changedCount');
+        const statsBar = document.getElementById('statsBar');
+        const clearManualBtn = document.getElementById('clearManualBtn');
+        const notificationBadge = document.getElementById('notificationBadge');
+        
+        // State data
+        let currentProcessedLines = [];     // array hasil setelah diproses (string bersih)
+        let currentRawStats = { total: 0, changed: 0 };
+        
+        // Helper: Tampilkan notifikasi modern (toast)
+        function showNotification(message, type = 'success') {
+            const toastContainer = document.getElementById('toastMessage');
+            const bgColor = type === 'success' ? 'bg-emerald-600' : (type === 'error' ? 'bg-red-600' : 'bg-indigo-600');
+            const icon = type === 'success' ? 'fa-circle-check' : (type === 'error' ? 'fa-circle-exclamation' : 'fa-info-circle');
             
-            alert('Pengaturan Admin berhasil disimpan! Anda sekarang bisa mengirim pesan.');
-        });
-
-        // Logika saat Formulir Kirim Email ditekan
-        emailForm.addEventListener('submit', async function(e) {
-            e.preventDefault(); // Mencegah halaman refresh
-
-            // Pengecekan: Pastikan panel admin sudah diisi terlebih dahulu
-            if (!savedEmail || !savedPassword) {
-                alert('Tolong isi dan simpan pengaturan di Panel Admin terlebih dahulu!');
+            const toastDiv = document.createElement('div');
+            toastDiv.className = `${bgColor} text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 backdrop-blur-sm font-medium text-sm notification`;
+            toastDiv.innerHTML = `<i class="fas ${icon} text-lg"></i><span>${message}</span>`;
+            toastContainer.appendChild(toastDiv);
+            toastContainer.style.transform = 'translateY(0)';
+            toastContainer.style.opacity = '1';
+            
+            setTimeout(() => {
+                toastDiv.style.opacity = '0';
+                toastDiv.style.transform = 'translateX(20px)';
+                setTimeout(() => {
+                    if (toastDiv.parentNode) toastDiv.remove();
+                    if (toastContainer.children.length === 0) {
+                        toastContainer.style.transform = 'translateY(20px)';
+                        toastContainer.style.opacity = '0';
+                    }
+                }, 300);
+            }, 2800);
+        }
+        
+        // Fungsi utama: memproses array baris (dari manual atau hasil baca file)
+        // return { processedLines, changedCount, totalValid }
+        function processPhoneNumbers(linesArray) {
+            const validNumbers = [];
+            let changedCounter = 0;
+            
+            for (let rawLine of linesArray) {
+                let line = rawLine.trim();
+                if (line === "") continue;  // abaikan baris kosong
+                // Validasi: hanya baris yang mengandung angka (bisa juga karakter + dan angka, tapi nomor umum hanya angka)
+                // regex: hanya boleh mengandung digit (0-9) opsional plus? kita fokus angka murni, filter karakter non-digit diabaikan untuk keamanan?
+                // sesuai requirement: hanya proses baris yang berisi angka. Abaikan jika mengandung huruf atau simbol selain digit.
+                // Gunakan regex apakah minimal 1 digit dan hanya digit? (spasi sudah di-trim)
+                if (!/^\d+$/.test(line)) {
+                    // jika mengandung non-digit selain spasi? misal "62812-3456" tidak valid, skip
+                    continue;
+                }
+                
+                let original = line;
+                let processed = line;
+                let changed = false;
+                // Jika diawali dengan "62"
+                if (line.startsWith("62")) {
+                    processed = line.substring(2);   // hapus 2 karakter pertama "62"
+                    changed = true;
+                    changedCounter++;
+                } else {
+                    processed = line; // tetap
+                }
+                validNumbers.push(processed);
+            }
+            
+            return {
+                processedLines: validNumbers,
+                changedCount: changedCounter,
+                totalValid: validNumbers.length
+            };
+        }
+        
+        // Update UI setelah proses (output + statistik)
+        function updateUIAfterProcess(processedLines, changedCount, totalValid) {
+            // update output textarea
+            if (processedLines.length === 0) {
+                outputArea.value = "";
+                totalCountSpan.innerText = "0";
+                changedCountSpan.innerText = "0";
+                statsBar.style.width = "0%";
+                showNotification("Tidak ada data valid", "error");
+                notificationBadge.innerText = "⚠️ No valid data";
+                notificationBadge.classList.remove("hidden");
+                setTimeout(() => notificationBadge.classList.add("hidden"), 2000);
                 return;
             }
-
-            // Mengambil nilai subjek dan pesan
-            const subject = emailForm.querySelector('input[type="text"]').value;
-            const message = emailForm.querySelector('textarea').value;
             
-            // Memberikan efek visual bahwa pesan sedang dikirim
-            const submitBtn = emailForm.querySelector('button');
-            const originalText = submitBtn.innerText;
-            submitBtn.innerText = 'Mengirim...';
-            submitBtn.disabled = true;
-
-            try {
-                // Mengirim data ke server Node.js kita
-                const response = await fetch('http://elgaaa.github.io/fix/main.js/api/send-email', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        senderEmail: savedEmail,
-                        appPassword: savedPassword,
-                        subject: subject,
-                        message: message
-                    })
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    alert(result.message);
-                    emailForm.reset(); // Mengosongkan formulir setelah berhasil
-                } else {
-                    alert('Error: ' + result.message);
+            const outputText = processedLines.join("\n");
+            outputArea.value = outputText;
+            totalCountSpan.innerText = totalValid;
+            changedCountSpan.innerText = changedCount;
+            const percent = totalValid > 0 ? (changedCount / totalValid) * 100 : 0;
+            statsBar.style.width = `${percent}%`;
+            if (changedCount > 0) {
+                showNotification(`✅ ${changedCount} dari ${totalValid} nomor diubah (hapus 62)`, "success");
+                notificationBadge.innerText = `✓ ${changedCount} diubah`;
+            } else if (totalValid > 0) {
+                showNotification(`📋 ${totalValid} nomor valid, tidak ada perubahan prefix`, "success");
+                notificationBadge.innerText = `✓ ${totalValid} nomor`;
+            } else {
+                showNotification("⚠️ Tidak ada data valid untuk diproses", "error");
+                notificationBadge.innerText = "⚠️ Tidak ada data";
+            }
+            notificationBadge.classList.remove("hidden");
+            setTimeout(() => notificationBadge.classList.add("hidden"), 2500);
+            
+            // simpan state current
+            currentProcessedLines = [...processedLines];
+            currentRawStats = { total: totalValid, changed: changedCount };
+        }
+        
+        // Fungsi untuk membaca dari manual (textarea) dan memproses
+        function processFromManualSource() {
+            const rawText = manualTextarea.value;
+            if (!rawText.trim()) {
+                showNotification("Tidak ada input di area manual", "error");
+                outputArea.value = "";
+                totalCountSpan.innerText = "0";
+                changedCountSpan.innerText = "0";
+                statsBar.style.width = "0%";
+                currentProcessedLines = [];
+                currentRawStats = { total: 0, changed: 0 };
+                return;
+            }
+            const lines = rawText.split(/\r?\n/);
+            const { processedLines, changedCount, totalValid } = processPhoneNumbers(lines);
+            updateUIAfterProcess(processedLines, changedCount, totalValid);
+        }
+        
+        // Baca file txt via FileReader
+        function handleFileUpload(file) {
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const content = e.target.result;
+                const lines = content.split(/\r?\n/);
+                const { processedLines, changedCount, totalValid } = processPhoneNumbers(lines);
+                updateUIAfterProcess(processedLines, changedCount, totalValid);
+                // tampilkan nama file
+                fileNameDisplay.innerText = `📄 ${file.name} (${totalValid} nomor valid)`;
+                showNotification(`File "${file.name}" berhasil diproses`, "success");
+                // Sinkronkan ke manual textarea? tidak perlu, tetapi lebih baik opsional: isi manual tidak berubah biar konsisten
+                // sesuai requirement: upload bisa langsung proses. Namun kita tidak override manual input agar user fleksibel
+            };
+            reader.onerror = function() {
+                showNotification("Gagal membaca file", "error");
+            };
+            reader.readAsText(file, "UTF-8");
+        }
+        
+        // Event file input
+        fileInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                if (!file.name.endsWith('.txt') && file.type !== 'text/plain') {
+                    showNotification("Harap pilih file .txt", "error");
+                    return;
                 }
-            } catch (error) {
-                alert('Tidak dapat terhubung ke server. Pastikan server Node.js sudah berjalan!');
-            } finally {
-                // Mengembalikan tombol seperti semula
-                submitBtn.innerText = originalText;
-                submitBtn.disabled = false;
+                handleFileUpload(file);
+            } else {
+                fileNameDisplay.innerText = "";
             }
         });
+        
+        // Tombol Proses: memprioritaskan gabungan? sesuai requirement tool sederhana: "Proses" berdasarkan input manual (textarea) 
+        // Juga jika ada upload sebelumnya otomatis proses? lebih intuitif: user bisa memasukkan manual lalu tekan proses.
+        // Jika upload file langsung langsung memproses (sudah kita handle), tapi tombol proses akan memproses manual textarea.
+        // Jadi konsisten: tombol "Proses" mengambil data dari textarea manual.
+        processBtn.addEventListener('click', () => {
+            processFromManualSource();
+        });
+        
+        // Reset Semua: kosongkan manual input, output area, statistik, dan reset file input state
+        function fullReset() {
+            manualTextarea.value = "";
+            outputArea.value = "";
+            totalCountSpan.innerText = "0";
+            changedCountSpan.innerText = "0";
+            statsBar.style.width = "0%";
+            currentProcessedLines = [];
+            currentRawStats = { total: 0, changed: 0 };
+            // reset file input
+            fileInput.value = "";
+            fileNameDisplay.innerText = "";
+            showNotification("Semua data direset", "success");
+            notificationBadge.innerText = "⟳ Reset";
+            notificationBadge.classList.remove("hidden");
+            setTimeout(() => notificationBadge.classList.add("hidden"), 1500);
+        }
+        resetBtn.addEventListener('click', fullReset);
+        
+        // Copy All: copy isi outputArea ke clipboard
+        copyAllBtn.addEventListener('click', async () => {
+            const outputText = outputArea.value;
+            if (!outputText.trim()) {
+                showNotification("Tidak ada hasil untuk disalin", "error");
+                return;
+            }
+            try {
+                await navigator.clipboard.writeText(outputText);
+                showNotification(`📋 ${currentProcessedLines.length} nomor berhasil disalin!`, "success");
+            } catch (err) {
+                // fallback
+                outputArea.select();
+                document.execCommand('copy');
+                showNotification("Berhasil disalin (fallback)", "success");
+            }
+        });
+        
+        // Download .txt: unduh hasil proses
+        downloadBtn.addEventListener('click', () => {
+            const content = outputArea.value;
+            if (!content.trim()) {
+                showNotification("Tidak ada data untuk diunduh. Silakan proses terlebih dahulu.", "error");
+                return;
+            }
+            const blob = new Blob([content], { type: "text/plain" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const timestamp = new Date().toISOString().slice(0,19).replace(/:/g, '-');
+            a.download = `processed_numbers_${timestamp}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showNotification("File hasil berhasil diunduh", "success");
+        });
+        
+        // Tombol kosongkan manual area (clear)
+        clearManualBtn.addEventListener('click', () => {
+            manualTextarea.value = "";
+            showNotification("Input manual dikosongkan", "success");
+        });
+        
+        // Optional: drag & drop subtle? Boleh tambahan tapi sudah cukup. 
+        // Saat load awal berikan contoh placeholder yang informatif.
+        // Default contoh agar user langsung paham
+        manualTextarea.value = "628123456789\n08123456789\n621234567890\n085212345678";
+        // auto proses awal? TIDAK tapi agar ada contoh, tetapi user harus klik proses. Tidak otomatis, lebih baik beri contoh.
+        // Sediakan tooltip bahwa harus klik proses.
+        // Agar pengalaman lebih modern, tapi tidak perlu auto proses.
+        
+        // Event tambahan: validasi dan memastikan ketika user upload file, statistik sudah muncul (oke)
+        // Sekarang kita juga perlu menampilkan preview data yang diubah secara realtime? tidak perlu.
+        // Namun untuk meningkatkan UX, pada saat user mengetik manual dan tekan proses langsung sesuai.
+        // Tambahkan juga informasi jika user ingin menggunakan upload langsung, file akan langsung diproses dan meng-overwrite output.
+        // Tapi output akan terisi dari file. dan manual tidak terpengaruh, tetap fleksibel.
+        // Sehingga dua jalur independen, tetapi tombol proses khusus untuk manual.
+        // Sempurna.
+        
+        // Juga untuk memenuhi "Tidak ada data valid" notifikasi dari proses manual
+        // tambahkan inisialisasi state awal
+        function initDemo() {
+            // bisa menampilkan statistik awal kosong
+            totalCountSpan.innerText = "0";
+            changedCountSpan.innerText = "0";
+            statsBar.style.width = "0%";
+            outputArea.value = "";
+            currentProcessedLines = [];
+        }
+        initDemo();
+        
+        // Saat halaman dimuat jika ada interaksi tambahan, memberikan clean state
+        // Untuk demo, agar user tidak bingung, kita bisa jalankan proses contoh secara opsional? tidak, biar user klik proses.
+        // Tapi kita bisa kasih tooltip? Tidak perlu.
+        // Minor: agar support dark mode sempurna, bg sudah gelap.
+        
+        // Bonus: Memproses drag and drop area sederhana? tidak diperlukan tapi stabil.
+        // Tambahkan pula validasi bahwa "62" hanya dihapus jika diawali persis (62) tanpa tambahan karakter lain.
+        // Contoh: "62812" -> "812", "62123" -> "123". Sudah sesuai.
+        
+        // Edge Cases: Jika nomor setelah dihapus "62" menjadi kosong? misal input "62" saja -> menjadi string kosong, validasi digit sudah di filter sebelumnya karena hanya digit dan length >=1, 
+        // kasus "62" akan menghasilkan "" (empty) maka fungsi processPhoneNumbers akan tetap memasukkannya? karena setelah substring menjadi "", tapi kita memeriksa line asli sudah digit semua.
+        // Namun nomor kosong tidak diinginkan. Kita filter tambahan: jika setelah proses nomor kosong, abaikan? tapi ini jarang. Mari kita filter tambahan jika processed.length === 0 skip.
+        // Update fungsi processPhoneNumbers untuk menghindari hasil kosong.
+        // Fix improvement:
+        function processPhoneNumbersFinal(linesArray) {
+            const validNumbers = [];
+            let changedCounter = 0;
+            
+            for (let rawLine of linesArray) {
+                let line = rawLine.trim();
+                if (line === "") continue;
+                if (!/^\d+$/.test(line)) continue;
+                
+                let original = line;
+                let processed = line;
+                let changed = false;
+                if (line.startsWith("62")) {
+                    processed = line.substring(2);
+                    // Jika setelah hapus 62 menjadi string kosong, skip karena nomor tidak valid
+                    if (processed.length === 0) continue;
+                    changed = true;
+                    changedCounter++;
+                } else {
+                    processed = line;
+                }
+                // validasi tambahan processed hanya berisi digit (sudah pasti)
+                validNumbers.push(processed);
+            }
+            return {
+                processedLines: validNumbers,
+                changedCount: changedCounter,
+                totalValid: validNumbers.length
+            };
+        }
+        // overwrite processPhoneNumbers dengan versi aman
+        window.processPhoneNumbers = processPhoneNumbersFinal;
+        // ubah referensi di handler2:
+        function processFromManualSourceFixed() {
+            const rawText = manualTextarea.value;
+            if (!rawText.trim()) {
+                showNotification("Tidak ada input di area manual", "error");
+                outputArea.value = "";
+                totalCountSpan.innerText = "0";
+                changedCountSpan.innerText = "0";
+                statsBar.style.width = "0%";
+                currentProcessedLines = [];
+                currentRawStats = { total: 0, changed: 0 };
+                return;
+            }
+            const lines = rawText.split(/\r?\n/);
+            const { processedLines, changedCount, totalValid } = processPhoneNumbersFinal(lines);
+            updateUIAfterProcess(processedLines, changedCount, totalValid);
+        }
+        
+        function handleFileUploadFixed(file) {
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const content = e.target.result;
+                const lines = content.split(/\r?\n/);
+                const { processedLines, changedCount, totalValid } = processPhoneNumbersFinal(lines);
+                updateUIAfterProcess(processedLines, changedCount, totalValid);
+                fileNameDisplay.innerText = `📄 ${file.name} (${totalValid} nomor valid)`;
+                showNotification(`File "${file.name}" berhasil diproses`, "success");
+            };
+            reader.onerror = function() {
+                showNotification("Gagal membaca file", "error");
+            };
+            reader.readAsText(file, "UTF-8");
+        }
+        
+        // reassign event handlers final
+        fileInput.onchange = (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                if (!file.name.endsWith('.txt') && file.type !== 'text/plain') {
+                    showNotification("Harap pilih file .txt", "error");
+                    return;
+                }
+                handleFileUploadFixed(file);
+            } else {
+                fileNameDisplay.innerText = "";
+            }
+        };
+        processBtn.onclick = () => { processFromManualSourceFixed(); };
+        
+        // Juga sinkronisasi dengan manual
+        console.log("✅ Phone Processor siap digunakan | Modern Tool");
     </script>
 </body>
 </html>
